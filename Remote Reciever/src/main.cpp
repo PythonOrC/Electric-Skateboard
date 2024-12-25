@@ -85,39 +85,3 @@ void loop()
 
 	delay(50);
 }
-
-// /*
-//   Name:    setCurrent.ino
-//   Created: 19-08-2018
-//   Author:  SolidGeek
-//   Description: This is a very simple example of how to set the current for the motor
-// */
-
-// #include <VescUart.h>
-// #include <SoftwareSerial.h>
-
-// /** Initiate VescUart class */
-// VescUart vescUart;
-// SoftwareSerial vescSerial(13, 15);
-
-// float current = 1.0; /** The current in amps */
-
-// void setup()
-// {
-// 	Serial.begin(9600);
-// 	/** Setup UART port (Serial1 on Atmega32u4) */
-// 	vescSerial.begin(115200);
-
-// 	/** Define which ports to use as UART */
-// 	vescUart.setSerialPort(&vescSerial);
-// 	vescUart.setDebugPort(&Serial);
-// }
-
-// void loop()
-// {
-
-// 	/** Call the function setCurrent() to set the motor current */
-// 	vescUart.setDuty(current);
-
-// 	// UART.setBrakeCurrent(current);
-// }

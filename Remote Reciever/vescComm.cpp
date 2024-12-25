@@ -4,10 +4,8 @@
 #include <SoftwareSerial.h>
 
 #define DEBUG true
-VescComm::VescComm()
+VescComm::VescComm() : vescSerial(13, 15)
 {
-    SoftwareSerial vescSerial(13, 15);
-
     /** Setup Serial port to display data */
     Serial.begin(9600);
 
