@@ -6,7 +6,7 @@
 #define DEBUG true
 VescComm::VescComm()
 {
-    SoftwareSerial vescSerial(2, 3);
+    SoftwareSerial vescSerial(13, 15);
 
     /** Setup Serial port to display data */
     Serial.begin(9600);
