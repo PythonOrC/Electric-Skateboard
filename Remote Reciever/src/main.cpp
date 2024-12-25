@@ -7,7 +7,7 @@ SoftwareSerial vescSerial(13, 15);
 bool bit_mask[32] = {false};
 uint32_t mask;
 int lastTime = 0;
-int dutyCycle = 0;
+float dutyCycle = 0;
 
 uint32_t createBitmask(bool values[32])
 {
@@ -60,10 +60,10 @@ void setup()
 	/** Define which ports to use as UART */
 	vescUart.setSerialPort(&vescSerial);
 	vescUart.setDebugPort(&Serial);
-	// createBitmaskBits();
-	// mask = createBitmask(bit_mask);
-	// Serial.print("Mask: ");
-	// Serial.println(mask);
+	createBitmaskBits();
+	mask = createBitmask(bit_mask);
+	Serial.print("Mask: ");
+	Serial.println(mask);
 }
 
 void loop()
@@ -71,17 +71,17 @@ void loop()
 	// set motor properties for the vesc controller
 	if (millis() - lastTime > 100)
 	{
-		lastTime = millis();
 		vescUart.setDuty(dutyCycle);
 		dutyCycle += 0.01;
 		if (dutyCycle > 0.3)
 		{
 			dutyCycle = 0.0;
 		}
+		lastTime = millis();
 	}
 
 	// retrieve data from the vesc controller
-	// vescUart.getVescValuesSelective(mask);
+	vescUart.getVescValuesSelective(mask);
 
 	delay(50);
 }
