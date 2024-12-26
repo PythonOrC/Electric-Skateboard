@@ -3,7 +3,7 @@
 #include <VescUart.h>
 #include <SoftwareSerial.h>
 
-#define DEBUG true
+#define DEBUG false
 VescComm::VescComm() : vescSerial(13, 15)
 {
     /** Setup Serial port to display data */

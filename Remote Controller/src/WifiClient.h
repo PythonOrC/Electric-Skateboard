@@ -1,9 +1,9 @@
-#ifndef WFIISERVER_H
-#define WIFISERVER_H
+#ifndef WFIICLIENT_H
+#define WFIICLIENT_H
 
 #include <cstdint>
-#include <ESP8266WiFi.h>
-class WifiServer
+
+class WifiClient
 {
 public:
     enum ControlMode
@@ -37,12 +37,14 @@ public:
         bool timedOut;
         bool timeoutSwitchActive;
     };
-    WifiServer();
-    void sendTCPMessage(WifiServer::VescDataPackage message);
+    WifiClient();
+    bool connectedToServer();
+    void reconnect();
+    bool tcpConnected();
+    void sendTCPMessage(WifiClient::RemoteDataPackage message);
     void receiveTCPMessage();
-    bool connectedToClient();
-    RemoteDataPackage remoteData;
-    WiFiClient wifiClient;
+    void printVescValues();
+    VescDataPackage vescData;
 
 private:
     void buffer_append_int32(uint8_t *buffer, int32_t number, int32_t *index);

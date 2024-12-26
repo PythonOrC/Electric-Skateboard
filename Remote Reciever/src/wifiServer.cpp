@@ -1,13 +1,11 @@
 #include <ESP8266WiFi.h>
-#include <WiFiUdp.h>
 #include "wifiServer.h"
 // WiFi credentials
 const char *ssid = "ESP8266_AP";
 const char *password = "password";
 
-// UDP setup
-WiFiUDP udp;
-unsigned int localPort = 4210; // Port for the server to listen on
+// TCP setup
+WiFiServer tcpServer(4210);
 
 WifiServer::WifiServer()
 {
@@ -19,12 +17,12 @@ WifiServer::WifiServer()
     Serial.print("IP Address: ");
     Serial.println(WiFi.softAPIP());
 
-    // Begin UDP
-    udp.begin(localPort);
-    Serial.printf("Listening on UDP port %d\n", localPort);
+    // Begin TCP
+    tcpServer.begin();
+    Serial.printf("TCP Server started");
 }
 
-void WifiServer::sendUDPMessage(WifiServer::VescDataPackage message)
+void WifiServer::sendTCPMessage(WifiServer::VescDataPackage message)
 {
     // Create a packet to send
     uint8_t packet[255];
@@ -47,26 +45,32 @@ void WifiServer::sendUDPMessage(WifiServer::VescDataPackage message)
     packet[index++] = message.timedOut ? 1 : 0;
     packet[index++] = message.timeoutSwitchActive ? 1 : 0;
 
-    // Send a response back to the client
-    udp.beginPacket(udp.remoteIP(), udp.remotePort());
-    udp.write(packet, index);
-    udp.endPacket();
+    wifiClient.write(packet, index);
 }
 
-void WifiServer::receiveUDPMessage()
+void WifiServer::receiveTCPMessage()
 {
     char incomingPacket[255]; // Buffer for incoming packets
-    int packetSize = udp.parsePacket();
+                              // recieve the packet and get the size
+
+    int packetSize = wifiClient.available();
     // read the remote packet into the remoteDataPackage struct
+    Serial.println("Receiving TCP message, packet size: " + String(packetSize));
     if (packetSize)
     {
-        udp.read(incomingPacket, packetSize);
-        RemoteDataPackage remoteData;
+        Serial.printf("Received %d bytes from %s, port %d\n", packetSize, wifiClient.remoteIP().toString().c_str(), wifiClient.remotePort());
+        wifiClient.read((uint8_t *)incomingPacket, packetSize);
         int index = 0;
         remoteData.dutyCycle = buffer_get_float32((uint8_t *)incomingPacket, 1000.0, &index);
         remoteData.current = buffer_get_float32((uint8_t *)incomingPacket, 100.0, &index);
         remoteData.controlMode = (ControlMode)incomingPacket[index];
     }
+}
+
+bool WifiServer::connectedToClient()
+{
+    // Check if a client is connected
+    return wifiClient.connected();
 }
 
 void WifiServer::buffer_append_int32(uint8_t *buffer, int32_t number, int32_t *index)

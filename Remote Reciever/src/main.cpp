@@ -9,20 +9,20 @@ WifiServer wifiServer;
 VescComm::VescData data;
 WifiServer::VescDataPackage wifiData;
 int LastTime = 0;
-float duty = 0.0;
-float current = 0.0;
-float dutyIncrement = 0.01;
-float currentIncrement = 0.1;
 void setup()
 {
 }
 
 void loop()
 {
-	data = vescComm.getData();
-	wifiData = convertToWifiData(data);
-	wifiServer.sendUDPMessage(wifiData);
-	wifiServer.receiveUDPMessage();
+	// only continue if the client is connected
+	if (!wifiServer.connectedToClient())
+	{
+		Serial.println("Client not connected");
+		return;
+	}
+
+	wifiServer.receiveTCPMessage();
 	switch (wifiServer.remoteData.controlMode)
 	{
 	case WifiServer::ControlMode::DUTY:
@@ -40,6 +40,9 @@ void loop()
 		vescComm.setDuty(0.0);
 		break;
 	}
+	data = vescComm.getData();
+	wifiData = convertToWifiData(data);
+	wifiServer.sendTCPMessage(wifiData);
 	delay(50);
 }
 
