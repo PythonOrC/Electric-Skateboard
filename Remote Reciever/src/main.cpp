@@ -1,87 +1,67 @@
-#include <stdint.h>
-#include <VescUart.h>
-#include <SoftwareSerial.h>
 
-VescUart vescUart;
-SoftwareSerial vescSerial(13, 15);
-bool bit_mask[32] = {false};
-uint32_t mask;
-int lastTime = 0;
-float dutyCycle = 0;
+#include "vescComm.h"
+#include "wifiServer.h"
 
-uint32_t createBitmask(bool values[32])
-{
-	uint32_t mask = 0;
-	for (int i = 0; i < 32; i++)
-	{
-		if (values[i])
-		{
-			mask |= 1 << i;
-		}
-	}
-	return mask;
-}
+WifiServer::VescDataPackage convertToWifiData(VescComm::VescData data);
 
-void createBitmaskBits()
-{
-	bit_mask[0] = false;  // FET temperature
-	bit_mask[1] = false;  // Motor temperature
-	bit_mask[2] = true;	  // Average motor current
-	bit_mask[3] = true;	  // Average input current
-	bit_mask[4] = false;  // Average D-axis current
-	bit_mask[5] = false;  // Average Q-axis current
-	bit_mask[6] = true;	  // Duty cycle now
-	bit_mask[7] = true;	  // RPM
-	bit_mask[8] = true;	  // Input voltage
-	bit_mask[9] = true;	  // Amp hours
-	bit_mask[10] = true;  // Amp hours charged
-	bit_mask[11] = true;  // Watt hours
-	bit_mask[12] = true;  // Watt hours charged
-	bit_mask[13] = true;  // Tachometer
-	bit_mask[14] = true;  // Tachometer absolute
-	bit_mask[15] = true;  // Fault code
-	bit_mask[16] = true;  // PID position
-	bit_mask[17] = true;  // Controller ID
-	bit_mask[18] = false; // MOS NTC temperature 1
-	bit_mask[19] = false; // MOS NTC temperature 2
-	bit_mask[20] = false; // MOS NTC temperature 3
-	bit_mask[21] = true;  // Timeout status
-}
-
+VescComm vescComm;
+WifiServer wifiServer;
+VescComm::VescData data;
+WifiServer::VescDataPackage wifiData;
+int LastTime = 0;
+float duty = 0.0;
+float current = 0.0;
+float dutyIncrement = 0.01;
+float currentIncrement = 0.1;
 void setup()
 {
-
-	/** Setup Serial port to display data */
-	Serial.begin(9600);
-
-	/** Setup SoftwareSerial port */
-	vescSerial.begin(115200);
-
-	/** Define which ports to use as UART */
-	vescUart.setSerialPort(&vescSerial);
-	vescUart.setDebugPort(&Serial);
-	createBitmaskBits();
-	mask = createBitmask(bit_mask);
-	Serial.print("Mask: ");
-	Serial.println(mask);
 }
 
 void loop()
 {
-	// set motor properties for the vesc controller
-	if (millis() - lastTime > 100)
+	data = vescComm.getData();
+	wifiData = convertToWifiData(data);
+	wifiServer.sendUDPMessage(wifiData);
+	wifiServer.receiveUDPMessage();
+	switch (wifiServer.remoteData.controlMode)
 	{
-		vescUart.setDuty(dutyCycle);
-		dutyCycle += 0.01;
-		if (dutyCycle > 0.3)
-		{
-			dutyCycle = 0.0;
-		}
-		lastTime = millis();
+	case WifiServer::ControlMode::DUTY:
+		vescComm.setDuty(wifiServer.remoteData.dutyCycle);
+		break;
+
+	case WifiServer::ControlMode::CURRENT:
+		vescComm.setCurrent(wifiServer.remoteData.current);
+		break;
+
+	case WifiServer::ControlMode::RPM:
+		vescComm.setRPM(wifiServer.remoteData.dutyCycle);
+		break;
+	default:
+		vescComm.setDuty(0.0);
+		break;
 	}
-
-	// retrieve data from the vesc controller
-	vescUart.getVescValuesSelective(mask);
-
 	delay(50);
+}
+
+WifiServer::VescDataPackage convertToWifiData(VescComm::VescData data)
+{
+	// convert the data from the VescData struct to the DataPackage struct
+	wifiData.avgMotorCurrent = data.avgMotorCurrent;
+	wifiData.avgInputCurrent = data.avgInputCurrent;
+	wifiData.dutyCycleNow = data.dutyCycleNow;
+	wifiData.rpm = data.rpm;
+	wifiData.inpVoltage = data.inpVoltage;
+	wifiData.ampHours = data.ampHours;
+	wifiData.ampHoursCharged = data.ampHoursCharged;
+	wifiData.wattHours = data.wattHours;
+	wifiData.wattHoursCharged = data.wattHoursCharged;
+	wifiData.tachometer = data.tachometer;
+	wifiData.tachometerAbs = data.tachometerAbs;
+	wifiData.pidPos = data.pidPos;
+	wifiData.id = data.id;
+	wifiData.faultCode = data.error;
+	wifiData.timedOut = data.timedOut;
+	wifiData.timeoutSwitchActive = data.timeoutSwitchActive;
+
+	return wifiData;
 }

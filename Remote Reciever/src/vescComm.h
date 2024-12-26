@@ -21,8 +21,6 @@ public:
         float wattHoursCharged;
         long tachometer;
         long tachometerAbs;
-        float tempMosfet;
-        float tempMotor;
         float pidPos;
         uint8_t id;
         mc_fault_code error;
@@ -30,10 +28,9 @@ public:
         bool timeoutSwitchActive;
     };
     VescComm();
-    void commInit();
-    void sendUDPMessage(uint8_t message);
-    void receiveUDPMessage();
     void setDuty(float duty);
+    void setCurrent(float current);
+    void setRPM(float rpm);
     void printVescValues();
     VescComm::VescData getData();
     VescData data;
@@ -45,6 +42,7 @@ private:
     SoftwareSerial vescSerial;
     bool bit_mask[32] = {false};
     uint32_t mask;
+    void toVescCommData();
 };
 
 #endif

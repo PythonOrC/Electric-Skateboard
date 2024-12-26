@@ -65,21 +65,45 @@ void VescComm::createBitmaskBits()
 
 void VescComm::setDuty(float duty)
 {
-    Serial.print("Setting Duty: ");
-    Serial.println(duty);
     vescUart.setDuty(duty);
-    Serial.print("Duty: ");
-    Serial.println(duty);
+}
+
+void VescComm::setCurrent(float current)
+{
+    vescUart.setCurrent(current);
+}
+
+void VescComm::setRPM(float rpm)
+{
+    vescUart.setRPM(rpm);
 }
 
 VescComm::VescData VescComm::getData()
 {
     vescUart.getVescValuesSelective(mask);
-    if (DEBUG)
-    {
-        printVescValues();
-    }
+    vescUart.printVescValues();
+    toVescCommData();
     return data;
+}
+
+void VescComm::toVescCommData()
+{
+    data.avgMotorCurrent = vescUart.data.avgMotorCurrent;
+    data.avgInputCurrent = vescUart.data.avgInputCurrent;
+    data.dutyCycleNow = vescUart.data.dutyCycleNow;
+    data.rpm = vescUart.data.rpm;
+    data.inpVoltage = vescUart.data.inpVoltage;
+    data.ampHours = vescUart.data.ampHours;
+    data.ampHoursCharged = vescUart.data.ampHoursCharged;
+    data.wattHours = vescUart.data.wattHours;
+    data.wattHoursCharged = vescUart.data.wattHoursCharged;
+    data.tachometer = vescUart.data.tachometer;
+    data.tachometerAbs = vescUart.data.tachometerAbs;
+    data.pidPos = vescUart.data.pidPos;
+    data.id = vescUart.data.id;
+    data.error = vescUart.data.error;
+    data.timedOut = vescUart.data.timedOut;
+    data.timeoutSwitchActive = vescUart.data.timeoutSwitchActive;
 }
 
 void VescComm::printVescValues()
@@ -106,10 +130,6 @@ void VescComm::printVescValues()
     Serial.println(data.tachometer);
     Serial.print("Tachometer Absolute: ");
     Serial.println(data.tachometerAbs);
-    Serial.print("MOSFET Temp: ");
-    Serial.println(data.tempMosfet);
-    Serial.print("Motor Temp: ");
-    Serial.println(data.tempMotor);
     Serial.print("PID Position: ");
     Serial.println(data.pidPos);
     Serial.print("Controller ID: ");
