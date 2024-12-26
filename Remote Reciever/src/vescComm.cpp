@@ -3,7 +3,7 @@
 #include <VescUart.h>
 #include <Arduino.h>
 
-#define DEBUG true
+#define DEBUG false
 VescComm::VescComm()
 {
     /** Setup Serial port to display data */
