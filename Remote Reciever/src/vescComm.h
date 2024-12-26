@@ -3,7 +3,6 @@
 
 #include <cstdint>
 #include <VescUart.h>
-#include <SoftwareSerial.h>
 class VescComm
 {
 
@@ -39,7 +38,6 @@ private:
     void createBitmaskBits();
     uint32_t createBitmask(bool values[32]);
     VescUart vescUart;
-    SoftwareSerial vescSerial;
     bool bit_mask[32] = {false};
     uint32_t mask;
     void toVescCommData();

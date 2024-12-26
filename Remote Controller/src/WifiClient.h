@@ -42,7 +42,7 @@ public:
     void reconnect();
     bool tcpConnected();
     void sendTCPMessage(WifiClient::RemoteDataPackage message);
-    void receiveTCPMessage();
+    bool receiveTCPMessage();
     void printVescValues();
     VescDataPackage vescData;
 

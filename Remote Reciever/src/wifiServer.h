@@ -2,7 +2,7 @@
 #define WIFISERVER_H
 
 #include <cstdint>
-#include <ESP8266WiFi.h>
+#include <WiFi.h>
 class WifiServer
 {
 public:
@@ -39,9 +39,10 @@ public:
     };
     WifiServer();
     void sendTCPMessage(WifiServer::VescDataPackage message);
-    void receiveTCPMessage();
+    bool receiveTCPMessage();
     bool connectedToClient();
     void connectNewClient();
+    void closeClient();
     RemoteDataPackage remoteData;
     WiFiClient wifiClient;
 

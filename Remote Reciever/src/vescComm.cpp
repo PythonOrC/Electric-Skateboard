@@ -1,19 +1,19 @@
 #include "vescComm.h"
 #include <stdint.h>
 #include <VescUart.h>
-#include <SoftwareSerial.h>
+#include <Arduino.h>
 
-#define DEBUG false
-VescComm::VescComm() : vescSerial(13, 15)
+#define DEBUG true
+VescComm::VescComm()
 {
     /** Setup Serial port to display data */
     Serial.begin(9600);
 
-    /** Setup SoftwareSerial port */
-    vescSerial.begin(115200);
+    /** Setup Vesc port */
+    Serial2.begin(115200);
 
     /** Define which ports to use as UART */
-    vescUart.setSerialPort(&vescSerial);
+    vescUart.setSerialPort(&Serial2);
     if (DEBUG)
     {
         vescUart.setDebugPort(&Serial);

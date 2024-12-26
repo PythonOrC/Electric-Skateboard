@@ -1,36 +1,13 @@
-#include <ESP8266WiFi.h>
+#include <WiFi.h>
 #include "wifiServer.h"
-// WiFi credentials
-const char *ssid = "ESP8266_AP";
-const char *password = "password";
+#include <Arduino.h>
 
 // TCP setup
-WiFiServer tcpServer(4210);
 
 WifiServer::WifiServer()
 {
-    // Set up the ESP8266 as an Access Point
-    WiFi.softAP(ssid, password);
-    IPAddress apIP(192, 168, 1, 1); // Static IP for the server
-    WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-    Serial.println("Access Point started");
-    Serial.print("IP Address: ");
-    Serial.println(WiFi.softAPIP());
-
-    // Begin TCP
-    tcpServer.begin();
-    Serial.printf("TCP Server started");
 }
 
-void WifiServer::connectNewClient()
-{
-    // Check if a client is trying to connect
-    wifiClient = tcpServer.available();
-    if (wifiClient)
-    {
-        Serial.println("New client connected");
-    }
-}
 
 void WifiServer::sendTCPMessage(WifiServer::VescDataPackage message)
 {
@@ -58,14 +35,13 @@ void WifiServer::sendTCPMessage(WifiServer::VescDataPackage message)
     wifiClient.write(packet, index);
 }
 
-void WifiServer::receiveTCPMessage()
+bool WifiServer::receiveTCPMessage()
 {
     char incomingPacket[255]; // Buffer for incoming packets
                               // recieve the packet and get the size
 
     int packetSize = wifiClient.available();
     // read the remote packet into the remoteDataPackage struct
-    Serial.println("Receiving TCP message, packet size: " + String(packetSize));
     if (packetSize)
     {
         Serial.printf("Received %d bytes from %s, port %d\n", packetSize, wifiClient.remoteIP().toString().c_str(), wifiClient.remotePort());
@@ -74,9 +50,22 @@ void WifiServer::receiveTCPMessage()
         remoteData.dutyCycle = buffer_get_float32((uint8_t *)incomingPacket, 1000.0, &index);
         remoteData.current = buffer_get_float32((uint8_t *)incomingPacket, 100.0, &index);
         remoteData.controlMode = (ControlMode)incomingPacket[index];
+
+        return true;
+    }
+    else
+    {
+        Serial.println("No data received");
+
+        return false;
     }
 }
 
+void WifiServer::closeClient()
+{
+    // Close the client
+    wifiClient.stop();
+}
 bool WifiServer::connectedToClient()
 {
     // Check if a client is connected

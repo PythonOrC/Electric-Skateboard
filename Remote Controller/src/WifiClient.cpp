@@ -1,9 +1,9 @@
 #include <WifiClient.h>
 #include <stdint.h>
-#include <ESP8266WiFi.h>
+#include <WiFi.h>
 
 // WiFi credentials
-const char *ssid = "ESP8266_AP";
+const char *ssid = "ESP32_AP";
 const char *password = "password";
 
 // UDP setup
@@ -72,7 +72,7 @@ void WifiClient::sendTCPMessage(WifiClient::RemoteDataPackage message)
     tcpClient.write(packet, index);
 }
 
-void WifiClient::receiveTCPMessage()
+bool WifiClient::receiveTCPMessage()
 {
     uint8_t incomingPacket[255]; // Buffer for incoming packets
     // recieve the packet and get the size
@@ -101,10 +101,14 @@ void WifiClient::receiveTCPMessage()
         vescData.faultCode = incomingPacket[index++];
         vescData.timedOut = incomingPacket[index++] == 1;
         vescData.timeoutSwitchActive = incomingPacket[index++] == 1;
+
+        return true;
     }
     else
     {
         Serial.println("No data received");
+
+        return false;
     }
 }
 

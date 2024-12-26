@@ -8,7 +8,7 @@ void setup()
 {
   while (!wifiClient.connectedToServer())
   {
-    delay(1000);
+    delay(500);
   }
   remoteData.controlMode = WifiClient::ControlMode::DUTY;
 }
@@ -28,5 +28,4 @@ void loop()
     wifiClient.sendTCPMessage(remoteData);
     wifiClient.receiveTCPMessage();
   }
-  delay(50);
 }
