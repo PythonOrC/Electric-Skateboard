@@ -41,6 +41,7 @@ public:
     void sendTCPMessage(WifiServer::VescDataPackage message);
     void receiveTCPMessage();
     bool connectedToClient();
+    void connectNewClient();
     RemoteDataPackage remoteData;
     WiFiClient wifiClient;
 

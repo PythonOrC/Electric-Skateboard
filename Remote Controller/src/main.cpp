@@ -27,7 +27,6 @@ void loop()
     remoteData.dutyCycle = 0.2;
     wifiClient.sendTCPMessage(remoteData);
     wifiClient.receiveTCPMessage();
-    // wifiClient.printVescValues();
   }
   delay(50);
 }

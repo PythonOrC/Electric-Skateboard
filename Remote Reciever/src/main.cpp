@@ -19,30 +19,35 @@ void loop()
 	if (!wifiServer.connectedToClient())
 	{
 		Serial.println("Client not connected");
+		wifiServer.connectNewClient();
 		return;
 	}
-
-	wifiServer.receiveTCPMessage();
-	switch (wifiServer.remoteData.controlMode)
+	else
 	{
-	case WifiServer::ControlMode::DUTY:
-		vescComm.setDuty(wifiServer.remoteData.dutyCycle);
-		break;
+		Serial.println("Client connected");
 
-	case WifiServer::ControlMode::CURRENT:
-		vescComm.setCurrent(wifiServer.remoteData.current);
-		break;
+		wifiServer.receiveTCPMessage();
+		switch (wifiServer.remoteData.controlMode)
+		{
+		case WifiServer::ControlMode::DUTY:
+			vescComm.setDuty(wifiServer.remoteData.dutyCycle);
+			break;
 
-	case WifiServer::ControlMode::RPM:
-		vescComm.setRPM(wifiServer.remoteData.dutyCycle);
-		break;
-	default:
-		vescComm.setDuty(0.0);
-		break;
+		case WifiServer::ControlMode::CURRENT:
+			vescComm.setCurrent(wifiServer.remoteData.current);
+			break;
+
+		case WifiServer::ControlMode::RPM:
+			vescComm.setRPM(wifiServer.remoteData.dutyCycle);
+			break;
+		default:
+			vescComm.setDuty(0.0);
+			break;
+		}
+		data = vescComm.getData();
+		wifiData = convertToWifiData(data);
+		wifiServer.sendTCPMessage(wifiData);
 	}
-	data = vescComm.getData();
-	wifiData = convertToWifiData(data);
-	wifiServer.sendTCPMessage(wifiData);
 	delay(50);
 }
 

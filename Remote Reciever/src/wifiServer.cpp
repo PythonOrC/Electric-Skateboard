@@ -22,6 +22,16 @@ WifiServer::WifiServer()
     Serial.printf("TCP Server started");
 }
 
+void WifiServer::connectNewClient()
+{
+    // Check if a client is trying to connect
+    wifiClient = tcpServer.available();
+    if (wifiClient)
+    {
+        Serial.println("New client connected");
+    }
+}
+
 void WifiServer::sendTCPMessage(WifiServer::VescDataPackage message)
 {
     // Create a packet to send
