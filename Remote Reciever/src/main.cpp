@@ -1,6 +1,9 @@
 #include "vescComm.h"
-#include "WiFi.h"
 #include <Arduino.h>
+#include <esp_now.h>
+#include <esp_wifi.h>
+#include <WiFi.h>
+#include <Wire.h>
 
 // Enums
 enum ControlMode
@@ -16,6 +19,7 @@ struct RemoteDataPackage
 	float current;
 	ControlMode controlMode;
 };
+
 struct VescDataPackage
 {
 	float avgMotorCurrent;
@@ -35,110 +39,162 @@ struct VescDataPackage
 	bool timedOut;
 	bool timeoutSwitchActive;
 };
+
 // headers
-void connectNewClient();
-void sendTCPMessage(VescDataPackage message);
-bool receiveTCPMessage();
+VescDataPackage toVescDataPackage(VescComm::VescData message);
+void onDataSent(const uint8_t *mac, esp_now_send_status_t status);
+void onDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len);
+void readMacAddress();
+uint32_t createBitmask(bool values[32]);
+void printRemoteData();
 
-// WiFi credentials
-const char *ssid = "ESP32_AP";
-const char *password = "password";
+// MAC Address of your receiver
+uint8_t broadcastAddress[] = {0x54, 0x43, 0xb2, 0xac, 0xee, 0xf8};
+// uint8_t broadcastAddress[] = {0xc8, 0xc9, 0xa3, 0xce, 0xff, 0xd0};
 
+// Vesc Related Variables
 VescComm vescComm;
 VescComm::VescData data;
-VescDataPackage wifiData;
+
+// ESP-Now Related Variables
+VescDataPackage vescData;
 RemoteDataPackage remoteData;
-WiFiClient wifiClient;
-WiFiServer tcpServer(4210);
-int LastTime = 0;
+String success;
+esp_now_peer_info_t peerInfo;
 
 void setup()
 {
+	// Init Serial Monitor
 	Serial.begin(9600);
-	Serial.println("Starting WiFi Server");
-	WiFi.softAP(ssid, password);
-	IPAddress apIP = WiFi.softAPIP();
-	Serial.println("Access Point started");
-	Serial.print("IP Address: ");
-	Serial.println(WiFi.softAPIP());
 
-	// Begin TCP
-	tcpServer.begin();
-	Serial.printf("TCP Server started");
-}
-
-void connectNewClient()
-{
-	// print all active clients
-	Serial.println("Available clients:");
-	WiFiClient client = tcpServer.available();
-	while (client)
+	// Set device as a Wi-Fi Station
+	WiFi.mode(WIFI_STA);
+	Serial.print("[DEFAULT] ESP32 Board MAC Address: ");
+	readMacAddress();
+	// Init ESP-NOW
+	if (esp_now_init() != ESP_OK)
 	{
-		Serial.println(client.remoteIP());
-		client = tcpServer.available();
+		Serial.println("Error initializing ESP-NOW");
+		return;
 	}
-	// Check if a client is trying to connect
-	wifiClient = tcpServer.available();
-	if (wifiClient)
+
+	// Once ESPNow is successfully Init, we will register for Send CB to
+	// get the status of Trasnmitted packet
+	esp_now_register_send_cb(onDataSent);
+
+	// Register peer
+	memcpy(peerInfo.peer_addr, broadcastAddress, 6);
+	peerInfo.channel = 0;
+	peerInfo.encrypt = false;
+
+	// Add peer
+	if (esp_now_add_peer(&peerInfo) != ESP_OK)
 	{
-		Serial.print("New client connected: ");
-		Serial.println(wifiClient.remoteIP());
+		Serial.println("Failed to add peer");
+		return;
 	}
-}
-void sendTCPMessage(VescComm::VescData message)
-{
-	// Create a packet to send
-	uint8_t packet[255];
-	// add the data to the packet
-	int index = 0;
-	buffer_append_float32(packet, message.avgMotorCurrent, 100.0, &index);
-	buffer_append_float32(packet, message.avgInputCurrent, 100.0, &index);
-	buffer_append_float32(packet, message.dutyCycleNow, 1000.0, &index);
-	buffer_append_float32(packet, message.rpm, 1.0, &index);
-	buffer_append_float32(packet, message.inpVoltage, 10.0, &index);
-	buffer_append_float32(packet, message.ampHours, 10000.0, &index);
-	buffer_append_float32(packet, message.ampHoursCharged, 10000.0, &index);
-	buffer_append_float32(packet, message.wattHours, 10000.0, &index);
-	buffer_append_float32(packet, message.wattHoursCharged, 10000.0, &index);
-	buffer_append_int32(packet, message.tachometer, &index);
-	buffer_append_int32(packet, message.tachometerAbs, &index);
-	packet[index++] = message.error;
-	buffer_append_float32(packet, message.pidPos, 1000000.0, &index);
-	packet[index++] = message.id;
-	packet[index++] = message.timedOut ? 1 : 0;
-	packet[index++] = message.timeoutSwitchActive ? 1 : 0;
-
-	wifiClient.write(packet, index);
+	// Register for a callback function that will be called when data is received
+	esp_now_register_recv_cb(esp_now_recv_cb_t(onDataRecv));
 }
 
-bool receiveTCPMessage()
+void loop()
 {
-	char incomingPacket[255]; // Buffer for incoming packets
-							  // recieve the packet and get the size
+	// Send message via ESP-NOW
+	vescData = toVescDataPackage(vescComm.getData());
+	esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *)&vescData, sizeof(vescData));
 
-	int packetSize = wifiClient.available();
-
-
-	// read the remote packet into the remoteDataPackage struct
-	if (packetSize)
+	if (result == ESP_OK)
 	{
-		Serial.printf("Received %d bytes from %s, port %d\n", packetSize, wifiClient.remoteIP().toString().c_str(), wifiClient.remotePort());
-		wifiClient.read((uint8_t *)incomingPacket, packetSize);
-		int index = 0;
-		remoteData.dutyCycle = buffer_get_float32((uint8_t *)incomingPacket, 1000.0, &index);
-		remoteData.current = buffer_get_float32((uint8_t *)incomingPacket, 100.0, &index);
-		remoteData.controlMode = (ControlMode)incomingPacket[index];
-
-		return true;
+		Serial.println("Sent with success");
 	}
 	else
 	{
-		Serial.println("No data received");
+		Serial.println("Error sending the data");
+	}
 
-		return false;
+}
+
+void onDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)
+{
+	Serial.print("\r\nLast Packet Send Status:\t");
+	Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
+	if (status == 0)
+	{
+		success = "Delivery Success :)";
+	}
+	else
+	{
+		success = "Delivery Fail :(";
 	}
 }
 
+// Callback when data is received
+void onDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
+{
+	Serial.println("Data received");
+	
+	memcpy(&remoteData, incomingData, sizeof(remoteData));
+
+	printRemoteData();
+
+	switch (remoteData.controlMode)
+	{
+	case ControlMode::DUTY:
+		Serial.print("Setting Duty Cycle: ");
+		Serial.println(remoteData.dutyCycle);
+		vescComm.setDuty(remoteData.dutyCycle);
+		break;
+
+	case ControlMode::CURRENT:
+		vescComm.setCurrent(remoteData.current);
+		break;
+
+	case ControlMode::RPM:
+		vescComm.setRPM(remoteData.dutyCycle);
+		break;
+	default:
+		vescComm.setDuty(0.0);
+		break;
+	}
+}
+
+VescDataPackage toVescDataPackage(VescComm::VescData message)
+{
+	VescDataPackage package;
+	package.avgMotorCurrent = message.avgMotorCurrent;
+	package.avgInputCurrent = message.avgInputCurrent;
+	package.dutyCycleNow = message.dutyCycleNow;
+	package.rpm = message.rpm;
+	package.inpVoltage = message.inpVoltage;
+	package.ampHours = message.ampHours;
+	package.ampHoursCharged = message.ampHoursCharged;
+	package.wattHours = message.wattHours;
+	package.wattHoursCharged = message.wattHoursCharged;
+	package.tachometer = message.tachometer;
+	package.tachometerAbs = message.tachometerAbs;
+	package.pidPos = message.pidPos;
+	package.id = message.id;
+	package.faultCode = message.error;
+	package.timedOut = message.timedOut;
+	package.timeoutSwitchActive = message.timeoutSwitchActive;
+	return package;
+}
+
+void readMacAddress()
+{
+	uint8_t baseMac[6];
+	esp_err_t ret = esp_wifi_get_mac(WIFI_IF_STA, baseMac);
+	if (ret == ESP_OK)
+	{
+		Serial.printf("%02x:%02x:%02x:%02x:%02x:%02x\n",
+					  baseMac[0], baseMac[1], baseMac[2],
+					  baseMac[3], baseMac[4], baseMac[5]);
+	}
+	else
+	{
+		Serial.println("Failed to read MAC address");
+	}
+}
 uint32_t createBitmask(bool values[32])
 {
 	uint32_t mask = 0;
@@ -152,29 +208,12 @@ uint32_t createBitmask(bool values[32])
 	return mask;
 }
 
-void loop()
+void printRemoteData()
 {
-	connectNewClient();
-	if (receiveTCPMessage())
-	{
-		switch (remoteData.controlMode)
-		{
-		case ControlMode::DUTY:
-			vescComm.setDuty(remoteData.dutyCycle);
-			break;
-
-		case ControlMode::CURRENT:
-			vescComm.setCurrent(remoteData.current);
-			break;
-
-		case ControlMode::RPM:
-			vescComm.setRPM(remoteData.dutyCycle);
-			break;
-		default:
-			vescComm.setDuty(0.0);
-			break;
-		}
-	}
-	data = vescComm.getData();
-	sendTCPMessage(data);
+	Serial.print("Duty Cycle: ");
+	Serial.println(remoteData.dutyCycle);
+	Serial.print("Current: ");
+	Serial.println(remoteData.current);
+	Serial.print("Control Mode: ");
+	Serial.println(remoteData.controlMode);
 }
