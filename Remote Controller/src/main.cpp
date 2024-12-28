@@ -1,9 +1,11 @@
 #include <Wire.h>
 #include <TFT_eSPI.h> // Hardware-specific library
+#include <ezButton.h>
 
 // define joystick pins
 #define JOYSTICK_Y_PIN 35
 #define JOYSTICK_X_PIN 34
+#define JOYSTICK_BUTTON_PIN 25
 
 enum ControlMode
 {
@@ -45,14 +47,16 @@ void getThrottle();
 int getJoystickPercent(int jotstickPin, int joystickCenter, int deadZone);
 void getControlMode();
 String getControlModeText(ControlMode mode);
+void getCruise();
+void calibrateCenter();
 
 TFT_eSPI tft = TFT_eSPI(); // Invoke library
 
 int lastTime = 0;
 int screenRefreshMs = 50;
 int deadZone = 30;
-int xCenter = 1955;
-int yCenter = 1960;
+int xCenter;
+int yCenter;
 // define elements to be displayed on the screen
 DisplayElement battery = {{118, 10, 46, 15}, "0%", 2, TFT_GREEN};
 DisplayElement throttle = {{130, 30, 58, 15}, "0%", 2, TFT_GREEN};
@@ -61,6 +65,7 @@ DisplayElement cruise = {{106, 90, 35, 15}, "OFF", 2, TFT_GREEN};
 
 DisplayData displayData = {100, 0, DUTY, false};
 bool xBackCenter = true;
+ezButton button(JOYSTICK_BUTTON_PIN);
 
 void setup()
 {
@@ -68,11 +73,14 @@ void setup()
 	Serial.begin(9600);
 	tft.begin();			   // Initialise the display
 	tft.fillScreen(TFT_BLACK); // Black screen fill
-	basicOverlay();			   // Draw the basic overlay
+	button.setDebounceTime(8);
+	calibrateCenter();
+	basicOverlay(); // Draw the basic overlay
 }
 
 void loop()
 {
+	button.loop();
 	getThrottle();
 	getControlMode();
 
@@ -119,9 +127,28 @@ void updateScreen()
 	}
 }
 
+void getCruise()
+{
+	if (button.isReleased())
+	{
+		displayData.cruiseOn = true;
+	}
+}
+
 void getThrottle()
 {
-	displayData.throttlePercent = getJoystickPercent(JOYSTICK_Y_PIN, yCenter, deadZone);
+
+	getCruise();
+	int throttle = getJoystickPercent(JOYSTICK_Y_PIN, yCenter, deadZone);
+	if (throttle < 0)
+	{
+		displayData.cruiseOn = false;
+		displayData.throttlePercent = throttle;
+	}
+	else if ((displayData.cruiseOn && throttle > displayData.throttlePercent) || !displayData.cruiseOn)
+	{
+		displayData.throttlePercent = throttle;
+	}
 }
 
 String getControlModeText(ControlMode mode)
@@ -137,6 +164,12 @@ String getControlModeText(ControlMode mode)
 	default:
 		return "Duty";
 	}
+}
+
+void calibrateCenter()
+{
+	xCenter = analogRead(JOYSTICK_X_PIN);
+	yCenter = analogRead(JOYSTICK_Y_PIN);
 }
 
 void basicOverlay()
