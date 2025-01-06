@@ -105,7 +105,6 @@ void loop()
 	{
 		Serial.println("Error sending the data");
 	}
-
 }
 
 // Callback when data is sent

@@ -49,8 +49,8 @@ uint32_t createBitmask(bool values[32]);
 void printRemoteData();
 
 // MAC Address of your receiver
-uint8_t broadcastAddress[] = {0x54, 0x43, 0xb2, 0xac, 0xee, 0xf8};
-// uint8_t broadcastAddress[] = {0xc8, 0xc9, 0xa3, 0xce, 0xff, 0xd0};
+// uint8_t broadcastAddress[] = {0x54, 0x43, 0xb2, 0xac, 0xee, 0xf8};
+uint8_t broadcastAddress[] = {0xc8, 0xc9, 0xa3, 0xce, 0xff, 0xd0};
 
 // Vesc Related Variables
 VescComm vescComm;
@@ -111,7 +111,6 @@ void loop()
 	{
 		Serial.println("Error sending the data");
 	}
-
 }
 
 void onDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)
@@ -132,7 +131,7 @@ void onDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)
 void onDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
 {
 	Serial.println("Data received");
-	
+
 	memcpy(&remoteData, incomingData, sizeof(remoteData));
 
 	printRemoteData();

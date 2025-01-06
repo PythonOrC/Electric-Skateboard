@@ -115,12 +115,13 @@ VescDataPackage vescData;
 void setup()
 {
 
-	Serial.begin(9600);
+	Serial.begin(115200);
 	tft.begin();			   // Initialise the display
-	tft.fillScreen(TFT_BLACK); // Black screen fill
+  tft.fillScreen(TFT_BLACK); // Black screen fill
+  basicOverlay(); // Draw the basic overlay
 	button.setDebounceTime(8);
 	calibrateCenter();
-	basicOverlay(); // Draw the basic overlay
+	
 	// Set device as a Wi-Fi Station
 	WiFi.mode(WIFI_STA);
 	Serial.print("[DEFAULT] ESP32 Board MAC Address: ");
@@ -150,6 +151,8 @@ void setup()
 	}
 	// Register for a callback function that will be called when data is received
 	esp_now_register_recv_cb(esp_now_recv_cb_t(OnDataRecv));
+
+
 }
 
 void loop()
