@@ -1,0 +1,256 @@
+{
+  "main": {
+    "id": "09d86db970d56302",
+    "type": "split",
+    "children": [
+      {
+        "id": "d2a9344d8045c8d0",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "e5d612f4be291509",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "b4d8d3a69ceb2952",
+    "type": "split",
+    "children": [
+      {
+        "id": "8b08ae1f4e601df1",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "a58df3439d1e08b6",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "56fa4b98fb45a369",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "\"CS Club\"",
+                "matchingCase": false,
+                "explainSearch": true,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "18f5045a678e600f",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 299.5
+  },
+  "right": {
+    "id": "f1d44c7f3554ec3b",
+    "type": "split",
+    "children": [
+      {
+        "id": "58d4ee06ec1ae43b",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "dfca596da056b42d",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Components.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for Components"
+            }
+          },
+          {
+            "id": "952eb16510776e90",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "576938bad0e5d17c",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Components.md"
+              },
+              "icon": "lucide-list",
+              "title": "Outline of Components"
+            }
+          },
+          {
+            "id": "4123ea40ffbe6c51",
+            "type": "leaf",
+            "state": {
+              "type": "calendar",
+              "state": {},
+              "icon": "calendar-with-checkmark",
+              "title": "Calendar"
+            }
+          },
+          {
+            "id": "37fea633700e7422",
+            "type": "leaf",
+            "state": {
+              "type": "reminder-list",
+              "state": {},
+              "icon": "clock",
+              "title": "Reminders"
+            }
+          },
+          {
+            "id": "387d03a3dbecc4bf",
+            "type": "leaf",
+            "state": {
+              "type": "advanced-tables-toolbar",
+              "state": {},
+              "icon": "spreadsheet",
+              "title": "Advanced Tables"
+            }
+          },
+          {
+            "id": "b5a2a1781b45b888",
+            "type": "leaf",
+            "state": {
+              "type": "git-view",
+              "state": {},
+              "icon": "git-pull-request",
+              "title": "Source Control"
+            }
+          },
+          {
+            "id": "f21b4cc6852dfeee",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Components.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from Components"
+            }
+          }
+        ],
+        "currentTab": 5
+      }
+    ],
+    "direction": "horizontal",
+    "width": 330.5
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "canvas:Create new canvas": false,
+      "graph:Open graph view": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "audio-recorder:Start/stop recording": false,
+      "markdown-importer:Open format converter": false,
+      "table-editor-obsidian:Advanced Tables Toolbar": false,
+      "templater-obsidian:Templater": false
+    }
+  },
+  "active": "e5d612f4be291509",
+  "lastOpenFiles": [
+    "Components.md",
+    "Ch 003X/Post Lab 1 Req.md",
+    "Ch 003X/Post Lab req.md",
+    "EE 7 Lab 1 del.md",
+    "Ch 003X/Course Structure.md",
+    "EE 7 Lab 1.md",
+    "Electric Skateboard.md",
+    "Overlake 10 Under 10 Nominee.md",
+    "Caltech Placement Essay Notes.md",
+    "EE ME 007 Intro to Mechatronics/Week 1 9-30-2024.md",
+    "Email Drafts/Letter to Professor Reiff.md",
+    "Email Drafts/Letter to Advisor.md",
+    "EE ME 007 Intro to Mechatronics",
+    "Ch 003X",
+    "Email Drafts.md",
+    "Email Drafts",
+    "Email Drafts/Letter of Professor Blank.md",
+    "conflict-files-obsidian-git.md",
+    "Rice Talk.md",
+    "Draft 3.md",
+    "Trap Shooting Scoring App.md",
+    "Econ Unit 5 Notes.md",
+    "Econ Unit 4 Notes.md",
+    "Dawn Discussion 2-27.md",
+    "Caltech Letter of Continued Interest.md",
+    "Update Material.md",
+    "Untitled 3.md",
+    "Brown Letter of  Continued Interest.md",
+    "Untitled 2.md",
+    "College App/~$School List & Majors.xlsx",
+    "Untitled.canvas",
+    "assets/Pasted image 20240108182229.png",
+    "assets/a8c11c74a8eb47c9ae3e11e7178083e.png",
+    "assets/Pasted image 20231222014337.png",
+    "assets/e8b42d8e2e0c7eb122cc18021ac6814.png",
+    "Space Weather Research",
+    "Space Weather Research/IEEE Journal Components/assets/20031029 minute 371.png",
+    "College App/College Essays",
+    "College App",
+    "Muon Research",
+    "~$School List & Majors.xlsx",
+    "Space Weather Research/IEEE Journal Components/assets/20031029 minute 1425.png",
+    "Space Weather Research/IEEE Journal Components/assets/20031029 minute 1361.png",
+    "Space Weather Research/IEEE Journal Components/assets/20031029 minute 1294.png",
+    "Space Weather Research/IEEE Journal Components/assets/20031029 minute 1209.png",
+    "Space Weather Research/IEEE Journal Components/assets/20031029 minute 1133.png",
+    "College App/School List & Majors.xlsx",
+    "attempt failed.canvas"
+  ]
+}
